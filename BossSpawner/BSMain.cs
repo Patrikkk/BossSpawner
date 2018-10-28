@@ -107,6 +107,16 @@ namespace BossSpawner
 						return;
 					}
 
+					//Check for players in arena
+					{
+						if (!TShock.Players.Any(e => e.CurrentRegion?.Name == region.Name))
+						{
+							TShock.Utils.Broadcast("No players are in the arena, bosses are not spawning.", Color.ForestGreen);
+							AwaitingSpawn = false;
+							return;
+						}
+					}
+
 					Dictionary<int, int> npcsToSpawn;
 
 					if (Config.npcsToSpawn.Count == 1)
