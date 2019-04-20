@@ -81,17 +81,16 @@ namespace BossSpawner
 				//if so, let people continue to kill bosses
 				if (Main.npc.ToList().Exists(e => e != null && e.active && npcsThatWereSpawned.ContainsKey(e.netID)))
 					return;
-
 				if (AwaitingSpawn)
 					return;
 
 				Task.Factory.StartNew(() => {
 					AwaitingSpawn = true;
-					TShock.Utils.Broadcast("All bosses have been killed! The next wave of bosses will start in 30 seconds...", Color.ForestGreen);
+					TSPlayer.All.SendMessage("There are no bosses remaining! The next wave of bosses will start in 30 seconds...", Color.ForestGreen);
 					Thread.Sleep(10000);
-					TShock.Utils.Broadcast("Bosses will spawn in 20 seconds at /warp arena!", Color.ForestGreen);
+					TSPlayer.All.SendMessage("Bosses will spawn in 20 seconds at /warp arena!", Color.ForestGreen);
 					Thread.Sleep(10000);
-					TShock.Utils.Broadcast("Bosses will spawn in 10 seconds at /warp arena!", Color.ForestGreen);
+					TSPlayer.All.SendMessage("Bosses will spawn in 10 seconds at /warp arena!", Color.ForestGreen);
 					Thread.Sleep(10000);
 
 					//make sure it's not day time!!!
@@ -109,16 +108,15 @@ namespace BossSpawner
 
 					//Check for players in arena
 					{
-						if (!TShock.Players.Any(e => e.CurrentRegion?.Name == region.Name))
+						if (!TShock.Players.Any(e => e != null && e.Active && e.CurrentRegion?.Name == region.Name))
 						{
-							TShock.Utils.Broadcast("No players are in the arena, bosses are not spawning.", Color.ForestGreen);
+							TSPlayer.All.SendMessage("No players are in the arena; bosses are not spawning.", Color.ForestGreen);
 							AwaitingSpawn = false;
 							return;
 						}
 					}
 
 					Dictionary<int, int> npcsToSpawn;
-
 					if (Config.npcsToSpawn.Count == 1)
 					{
 						npcsToSpawn = Config.npcsToSpawn[0];
@@ -127,14 +125,13 @@ namespace BossSpawner
 					{
 						npcsToSpawn = Config.npcsToSpawn[Random.Next(Config.npcsToSpawn.Count)]; //random
 
-						//Does this even work lol
 						while (npcsToSpawn == npcsThatWereSpawned)
 						{
 							npcsToSpawn = Config.npcsToSpawn[Random.Next(Config.npcsToSpawn.Count)]; //random
 						}
 					}
 
-					//spawn bosses!!
+					//Spawn bosses!!
 					npcsThatWereSpawned = npcsToSpawn;
 
 					TSPlayer.All.SendMessage($"Spawning bosses at /warp arena: {string.Join(", ", npcsToSpawn.Select(e => $"{e.Value}x {Lang.GetNPCNameValue(e.Key)}"))}", Color.ForestGreen);
